@@ -1,0 +1,40 @@
+yamlname: Build iOS IPA
+
+on:
+  workflow_dispatch: ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest
+
+      - name: Build and archive
+        run: |
+          xcodebuild -project FreeFCC.xcodeproj \
+                     -scheme YourScheme \
+                     -sdk iphoneos \
+                     -configuration Release \
+                     -archivePath build/YourApp.xcarchive archive
+
+      - name: Create IPA Package
+        run: | 
+        mkdir -p build/ipa/Payload
+        cp -r build/App.xcarchive/Products/Applications/*.app buid/ipa/Payload
+        cd build/ipa
+        zip -r App.ipa Payliad
+        name:Upload IPA
+        uses:actions/upload-artifact@v4
+        with:
+          name: iOS-App-IPA
+          patch:build/ipa/App.ipa
+          xcodebuild -exportArchive \
+                     -archivePath build/YourApp.xcarchive \
+                     -exportPath build/ipa \
+                     -exportOptionsPlist ExportOptions.plist
