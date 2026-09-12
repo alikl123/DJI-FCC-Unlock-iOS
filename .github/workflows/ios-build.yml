@@ -1,8 +1,8 @@
-yamlname: Build Unsigned iOS IPA
+yamlname: Build Unsigned FreeFCC IPA
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main ] # Сборка запускается при пуше в ветку main
 
 jobs:
   build:
@@ -11,10 +11,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Сборка архива без строгой проверки подписи
+      # Сборка архива приложения FreeFCC без подписи
       - name: Build archive
         run: |
-          xcodebuild -workspace FreeFcc.xcworkspace \
+          xcodebuild -project FreeFCC.xcodeproj \
                      -scheme FreeFCC \
                      -sdk iphoneos \
                      -configuration Release \
@@ -22,7 +22,7 @@ jobs:
                      CODE_SIGNING_REQUIRED=NO \
                      CODE_SIGNING_ALLOWED=NO
 
-      # Экспорт в .ipa файл
+      # Экспорт архива в готовый файл .ipa
       - name: Export IPA
         run: |
           xcodebuild -exportArchive \
@@ -32,10 +32,10 @@ jobs:
                      CODE_SIGNING_REQUIRED=NO \
                      CODE_SIGNING_ALLOWED=NO
 
-      # Сохранение готового файла
-      - name: Upload IPA Artifact
+      # Сохранение готового .ipa файла в артефакты GitHub
+      - name: Upload FreeFCC IPA
         uses: actions/upload-artifact@v4
         with:
-          name: unsigned-app-ipa
+          name: FreeFCC-unsigned-ipa
           path: build/ipa/*.ipa
 
