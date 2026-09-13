@@ -1,7 +1,6 @@
 name: Build FreeFCC IPA
 
 on:
-
   workflow_dispatch: # Позволяет запускать сборку вручную кнопкой в интерфейсе GitHub
 
 jobs:
