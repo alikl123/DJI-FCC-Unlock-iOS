@@ -1,1 +1,47 @@
+name: Build FreeFCC IPA
 
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+
+      - name: Pre-build setup (Telegram/FreeFCC specific)
+        run: |
+          if [ -f "./configure.sh" ]; then
+            chmod +x ./configure.sh
+            ./configure.sh
+          elif [ -f "./input.py" ]; then
+            python3 ./input.py
+          fi
+
+      - name: Build Xcode Project
+        run: |
+          if [ -d *.xcworkspace ]; then
+            xcodebuild -workspace *.xcworkspace -scheme "Telegram" -sdk iphoneos -configuration Release clean archive -archivePath build/FreeFCC.xcarchive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+          else
+            xcodebuild -project *.xcodeproj -scheme "Telegram" -sdk iphoneos -configuration Release clean archive -archivePath build/FreeFCC.xcarchive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+          fi
+
+      - name: Create IPA (Unsigned Payload)
+        run: |
+          mkdir -p Payload
+          cp -r build/FreeFCC.xcarchive/Products/Applications/*.app Payload/ || cp -r build/FreeFCC.xcarchive/Products/Applications/Telegram.app Payload/
+          zip -r FreeFCC.ipa Payload
+          
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FreeFCC-Unsigned-IPA
+          path: FreeFCC.ipa
