@@ -1,5 +1,5 @@
  yaml
-name:Build FreeFCC IPA
+name: Build FreeFCC IPA
 
 on:
   workflow_dispatch: # Позволяет запускать сборку вручную кнопкой в интерфейсе GitHub
