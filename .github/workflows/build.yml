@@ -1,1 +1,28 @@
+yaml
+name: Build FreeFCC IPA
 
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name:FreeFCC App
+      run: |
+        xcodebuild -project *.xcodeproj -scheme $(xcodebuild -list -json | json_pp | grep -m 1 "schemes" -A 1 | tail -n 1 | tr -d '", ') -configuration Release -sdk iphoneos CODE_SIGNING_ALLOWED=NO ARCHIVE_PATH=$PWD/build/App.xcarchive archive || xcodebuild -workspace *.xcworkspace -scheme $(xcodebuild -list -json | json_pp | grep -m 1 "schemes" -A 1 | tail -n 1 | tr -d '", ') -configuration Release -sdk iphoneos CODE_SIGNING_ALLOWED=NO ARCHIVE_PATH=$PWD/build/App.xcarchive archive
+
+    - name: FreeFCC IPA
+      run: |
+        mkdir -p FreeFCC/ipa/Payload
+        cp -r FreeFCC/App.xcarchive/Products/Applications/*.app build/ipa/Payload/
+        cd FreeFCC/ipa && zip -r App.ipa Payload
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: FreeFCC-App-IPA
+        path: FreeFCC/ipa/App.ipa
