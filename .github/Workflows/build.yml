@@ -1,4 +1,4 @@
- yaml
+yaml
 name: Build FreeFCC IPA
 
 on:
